@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,64 +8,31 @@ import {
   RefreshControl,
 } from 'react-native';
 import { UserRow } from '../components/UserRow';
-import { User } from '../types/user';
-import { usersApi } from '../../../api/usersApi';
-import { userStorage } from '../../../storage/userStorage';
+import { useUserStore } from '../store/useUserStore';
 
 export const UsersScreen = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [usingCache, setUsingCache] = useState(false);
+  const { 
+    users, 
+    isLoading, 
+    error, 
+    usingCache, 
+    loadUsers, 
+    refresh, 
+    clearError 
+  } = useUserStore();
 
   useEffect(() => {
-    loadUsersWithCache();
+    loadUsers();
   }, []);
 
-  const loadUsersWithCache = async (forceRefresh = false) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      if (!forceRefresh) {
-        const cachedUsers = await userStorage.loadUsers();
-        if (cachedUsers.length > 0) {
-          setUsers(cachedUsers);
-          setUsingCache(true);
-          setIsLoading(false);
-        }
-      }
-      
-      const freshData = await usersApi.fetchUsers();
-      
-      await userStorage.saveUsers(freshData);
-      
-      setUsers(freshData);
-      setUsingCache(false);
-      
-    } catch (err) {
-      console.error(err);
-      
-      if (users.length === 0) {
-        setError('Failed to load users. Please check your connection.');
-      } else {
-        setError('Using cached data. Connection error.');
-      }
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        clearError();
+      }, 5000);
+      return () => clearTimeout(timer);
     }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await loadUsersWithCache(true);
-  };
-
-  const handleRetry = async () => {
-    await loadUsersWithCache(true);
-  };
+  }, [error, clearError]);
 
   if (isLoading && users.length === 0) {
     return (
@@ -80,7 +47,7 @@ export const UsersScreen = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>{error}</Text>
-        <Text style={styles.retryText} onPress={handleRetry}>
+        <Text style={styles.retryText} onPress={() => loadUsers(true)}>
           Tap to retry
         </Text>
       </View>
@@ -91,11 +58,8 @@ export const UsersScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Users List</Text>
-        <Text style={styles.subtitle}>
-          React Native with Real API {usingCache && '(Cached)'}
-        </Text>
         {error && users.length > 0 && (
-          <Text style={styles.cacheWarning}>⚠️ Using cached data</Text>
+          <Text style={styles.cacheWarning}>⚠️ {error}</Text>
         )}
       </View>
       
@@ -107,8 +71,8 @@ export const UsersScreen = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
+            refreshing={isLoading && users.length > 0}
+            onRefresh={refresh}
             colors={['#007AFF']}
             tintColor="#007AFF"
           />
