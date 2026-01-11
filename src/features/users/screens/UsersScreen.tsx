@@ -57,7 +57,7 @@ export const UsersScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Users List</Text>
+        <Text style={styles.title}>User List</Text>
         {error && users.length > 0 && (
           <Text style={styles.cacheWarning}>⚠️ {error}</Text>
         )}
