@@ -1,4 +1,4 @@
-# Resolve react_native_pods.rb with node to allow for hoisting
+source 'https://cdn.cocoapods.org/'
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
@@ -16,10 +16,10 @@ end
 
 target 'react_native_user_list' do
   config = use_native_modules!
+  pod 'simdjson', :path => '../node_modules/@nozbe/simdjson', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 

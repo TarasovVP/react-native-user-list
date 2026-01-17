@@ -1,6 +1,8 @@
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
   plugins: [
-    ['react-native-web', { commonjs: true }]
+    ['@babel/plugin-proposal-decorators', { legacy: true }],
+    ['@babel/plugin-proposal-class-properties', { loose: true }],
+    ['@babel/plugin-transform-runtime', { helpers: true, regenerator: true }],
   ]
 };
