@@ -3,7 +3,6 @@ import LokiJSAdapter from '@nozbe/watermelondb/adapters/lokijs';
 import migrations from './migrations';
 import { schema } from './schema';
 import { UserRecord } from './models/UserRecord';
-import { MetaRecord } from './models/MetaRecord';
 
 const adapter = new LokiJSAdapter({
   schema,
@@ -17,5 +16,5 @@ const adapter = new LokiJSAdapter({
 
 export const database = new Database({
   adapter,
-  modelClasses: [UserRecord, MetaRecord],
+  modelClasses: [UserRecord],
 });
