@@ -1,6 +1,6 @@
-import { database } from '../db/database';
+import { database } from './database';
 import { User } from '../features/users/types/user';
-import { UserRecord } from '../db/models/UserRecord';
+import { UserRecord } from './models/UserRecord';
 
 const usersCollection = database.collections.get<UserRecord>('users');
 
@@ -16,7 +16,7 @@ const toDomain = (r: UserRecord): User => ({
   gender: r.gender,
 });
 
-export const userStorage = {
+export const usersDB = {
   loadUsers: async (): Promise<User[]> => {
     const records = await usersCollection.query().fetch();
     return records.map(toDomain);
